@@ -430,6 +430,113 @@ input[type="number"] { -moz-appearance: textfield; }
   position: relative;
 }
 
+/* ---- Total Panel (full-width) ---- */
+.total-panel {
+  margin-top: 32px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px 32px;
+  animation: fadeUp 0.8s ease-out both;
+  animation-delay: 0.25s;
+}
+
+.total-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.total-panel-header .panel-icon {
+  background: #6aaa9820;
+  color: var(--teal);
+}
+
+.total-pipeline {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+}
+
+.total-stat-card {
+  flex: 1;
+  text-align: center;
+  padding: 20px 12px 16px;
+  background: var(--bg);
+  border-radius: 10px;
+  position: relative;
+  transition: transform 0.2s;
+}
+
+.total-stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.total-stat-card.final {
+  background: linear-gradient(135deg, #2a2518, #2a2218);
+  border: 1px solid var(--amber-deep);
+}
+
+.total-stat-label {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.total-stat-value {
+  font-family: var(--font-mono);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+
+.total-stat-card.final .total-stat-value {
+  color: var(--amber);
+}
+
+.total-stat-sub {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  margin-top: 8px;
+}
+
+.total-stat-card.final .total-stat-sub {
+  color: var(--amber-deep);
+}
+
+.pipeline-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  flex-shrink: 0;
+  color: var(--text-dim);
+  opacity: 0.4;
+}
+
+.pipeline-arrow svg {
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 720px) {
+  .total-pipeline {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .total-stat-card { min-width: calc(50% - 4px); }
+  .pipeline-arrow { display: none; }
+  .total-panel { padding: 20px; }
+}
+
 /* ---- Formula footer ---- */
 .formula-bar {
   margin-top: 32px;
@@ -778,6 +885,57 @@ input[type="number"] { -moz-appearance: textfield; }
     </div>
   </div>
 
+  <!-- Total Panel -->
+  <div class="total-panel">
+    <div class="total-panel-header">
+      <div class="panel-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 14h4v7H4zm6-5h4v12h-4zm6-6h4v18h-4z"/></svg>
+      </div>
+      <div>
+        <div class="panel-title">全年级汇总</div>
+        <div class="panel-subtitle">三至六年级总计 · 平均通过率</div>
+      </div>
+    </div>
+
+    <div class="total-pipeline">
+      <div class="total-stat-card">
+        <div class="total-stat-label">第一轮 总人数</div>
+        <div class="total-stat-value" id="totalN1">-</div>
+        <div class="total-stat-sub">平均通过率 <span id="totalAvgR1">-</span></div>
+      </div>
+
+      <div class="pipeline-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14m-4-4l4 4-4 4"/></svg>
+      </div>
+
+      <div class="total-stat-card">
+        <div class="total-stat-label">第二轮 总人数</div>
+        <div class="total-stat-value" id="totalN2">-</div>
+        <div class="total-stat-sub">平均通过率 <span id="totalAvgR2">-</span></div>
+      </div>
+
+      <div class="pipeline-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14m-4-4l4 4-4 4"/></svg>
+      </div>
+
+      <div class="total-stat-card">
+        <div class="total-stat-label">第三轮 总人数</div>
+        <div class="total-stat-value" id="totalN3">-</div>
+        <div class="total-stat-sub">平均通过率 <span id="totalAvgR3">-</span></div>
+      </div>
+
+      <div class="pipeline-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14m-4-4l4 4-4 4"/></svg>
+      </div>
+
+      <div class="total-stat-card final">
+        <div class="total-stat-label">最终录取</div>
+        <div class="total-stat-value" id="totalFinal">-</div>
+        <div class="total-stat-sub">四个年级合计</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Formula bar -->
   <div class="formula-bar">
     <div class="formula-bar-title">Formula Reference</div>
@@ -923,6 +1081,16 @@ function updateSummaryTable() {
   ac[1].textContent = (avgR.r1 / 4).toFixed(1) + '%';
   ac[2].textContent = (avgR.r2 / 4).toFixed(1) + '%';
   ac[3].textContent = (avgR.r3 / 4).toFixed(1) + '%';
+
+  // Update total panel
+  const allEmpty = totals.finalPass === 0;
+  document.getElementById('totalN1').textContent = allEmpty ? '-' : totals.n1;
+  document.getElementById('totalN2').textContent = allEmpty ? '-' : totals.n2;
+  document.getElementById('totalN3').textContent = allEmpty ? '-' : totals.n3;
+  document.getElementById('totalFinal').textContent = allEmpty ? '-' : totals.finalPass + ' 人';
+  document.getElementById('totalAvgR1').textContent = (avgR.r1 / 4).toFixed(1) + '%';
+  document.getElementById('totalAvgR2').textContent = (avgR.r2 / 4).toFixed(1) + '%';
+  document.getElementById('totalAvgR3').textContent = (avgR.r3 / 4).toFixed(1) + '%';
 }
 
 function calc() {
