@@ -885,7 +885,7 @@ function updateFunnel(grade) {
   document.getElementById('dropLabel1').textContent = r.empty ? '-' : '淘汰 ' + Math.round(drop1) + '%';
   document.getElementById('dropLabel2').textContent = r.empty ? '-' : '淘汰 ' + Math.round(drop2) + '%';
 
-  document.getElementById('finalOut').textContent = r.empty ? '-' : r.finalPass + ' 人';
+  document.getElementById('finalOut').textContent = r.empty ? '-' : r.n3 > 0 ? r.finalPass + ' 人' : '-';
 }
 
 function updateSummaryTable() {
