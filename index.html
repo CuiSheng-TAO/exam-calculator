@@ -813,7 +813,7 @@ input[type="number"] { -moz-appearance: textfield; }
             <tr id="row5"><td>五年级</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
             <tr id="row6"><td>六年级</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
             <tr class="total-row" id="rowTotal"><td>总计</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-            <tr class="avg-row" id="rowAvg"><td>平均通过率</td><td>-</td><td>-</td><td>-</td><td>—</td></tr>
+            <tr class="avg-row" id="rowAvg"><td>综合通过率</td><td>-</td><td>-</td><td>-</td><td>—</td></tr>
           </tbody>
         </table>
       </div>
@@ -901,7 +901,7 @@ input[type="number"] { -moz-appearance: textfield; }
       <div class="total-stat-card">
         <div class="total-stat-label">第一轮 总人数</div>
         <div class="total-stat-value" id="totalN1">-</div>
-        <div class="total-stat-sub">平均通过率 <span id="totalAvgR1">-</span></div>
+        <div class="total-stat-sub">综合通过率 <span id="totalAvgR1">-</span></div>
       </div>
 
       <div class="pipeline-arrow">
@@ -911,7 +911,7 @@ input[type="number"] { -moz-appearance: textfield; }
       <div class="total-stat-card">
         <div class="total-stat-label">第二轮 总人数</div>
         <div class="total-stat-value" id="totalN2">-</div>
-        <div class="total-stat-sub">平均通过率 <span id="totalAvgR2">-</span></div>
+        <div class="total-stat-sub">综合通过率 <span id="totalAvgR2">-</span></div>
       </div>
 
       <div class="pipeline-arrow">
@@ -921,7 +921,7 @@ input[type="number"] { -moz-appearance: textfield; }
       <div class="total-stat-card">
         <div class="total-stat-label">第三轮 总人数</div>
         <div class="total-stat-value" id="totalN3">-</div>
-        <div class="total-stat-sub">平均通过率 <span id="totalAvgR3">-</span></div>
+        <div class="total-stat-sub">综合通过率 <span id="totalAvgR3">-</span></div>
       </div>
 
       <div class="pipeline-arrow">
@@ -1049,7 +1049,6 @@ function updateFunnel(grade) {
 function updateSummaryTable() {
   const grades = [3, 4, 5, 6];
   let totals = { n1: 0, n2: 0, n3: 0, finalPass: 0 };
-  let avgR = { r1: 0, r2: 0, r3: 0 };
 
   grades.forEach(g => {
     const r = calcGrade(g);
@@ -1064,9 +1063,6 @@ function updateSummaryTable() {
     totals.n2 += r.n2;
     totals.n3 += r.n3;
     totals.finalPass += r.finalPass;
-    avgR.r1 += r.r1;
-    avgR.r2 += r.r2;
-    avgR.r3 += r.r3;
   });
 
   const totalRow = document.getElementById('rowTotal');
@@ -1078,9 +1074,10 @@ function updateSummaryTable() {
 
   const avgRow = document.getElementById('rowAvg');
   const ac = avgRow.querySelectorAll('td');
-  ac[1].textContent = (avgR.r1 / 4).toFixed(1) + '%';
-  ac[2].textContent = (avgR.r2 / 4).toFixed(1) + '%';
-  ac[3].textContent = (avgR.r3 / 4).toFixed(1) + '%';
+  const hasN1 = totals.n1 > 0;
+  ac[1].textContent = hasN1 ? (totals.n2 / totals.n1 * 100).toFixed(1) + '%' : '-';
+  ac[2].textContent = hasN1 ? (totals.n3 / totals.n1 * 100).toFixed(1) + '%' : '-';
+  ac[3].textContent = hasN1 ? (totals.finalPass / totals.n1 * 100).toFixed(1) + '%' : '-';
 
   // Update total panel
   const allEmpty = totals.finalPass === 0;
@@ -1088,9 +1085,9 @@ function updateSummaryTable() {
   document.getElementById('totalN2').textContent = allEmpty ? '-' : totals.n2;
   document.getElementById('totalN3').textContent = allEmpty ? '-' : totals.n3;
   document.getElementById('totalFinal').textContent = allEmpty ? '-' : totals.finalPass + ' 人';
-  document.getElementById('totalAvgR1').textContent = (avgR.r1 / 4).toFixed(1) + '%';
-  document.getElementById('totalAvgR2').textContent = (avgR.r2 / 4).toFixed(1) + '%';
-  document.getElementById('totalAvgR3').textContent = (avgR.r3 / 4).toFixed(1) + '%';
+  document.getElementById('totalAvgR1').textContent = hasN1 ? (totals.n2 / totals.n1 * 100).toFixed(1) + '%' : '-';
+  document.getElementById('totalAvgR2').textContent = hasN1 ? (totals.n3 / totals.n1 * 100).toFixed(1) + '%' : '-';
+  document.getElementById('totalAvgR3').textContent = hasN1 ? (totals.finalPass / totals.n1 * 100).toFixed(1) + '%' : '-';
 }
 
 function calc() {
