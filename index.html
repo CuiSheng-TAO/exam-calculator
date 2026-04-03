@@ -476,6 +476,103 @@ input[type="number"] { -moz-appearance: textfield; }
   font-weight: 500;
 }
 
+/* ---- Grade Tabs ---- */
+.grade-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.grade-tab {
+  flex: 1;
+  padding: 8px 4px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-align: center;
+  color: var(--text-dim);
+  background: transparent;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+
+.grade-tab:hover { color: var(--text-muted); }
+
+.grade-tab.active {
+  background: var(--bg-elevated);
+  color: var(--amber);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+/* ---- Summary Table ---- */
+.summary-table-wrap {
+  margin-bottom: 24px;
+}
+
+.summary-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.summary-table th {
+  font-weight: 500;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.68rem;
+  padding: 8px 10px;
+  text-align: right;
+  border-bottom: 1px solid var(--border);
+}
+
+.summary-table th:first-child { text-align: left; }
+
+.summary-table td {
+  padding: 8px 10px;
+  text-align: right;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+
+.summary-table td:first-child {
+  text-align: left;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.summary-table tr.total-row td {
+  font-weight: 700;
+  color: var(--amber);
+  border-top: 2px solid var(--amber-deep);
+  border-bottom: none;
+}
+
+.summary-table tr.avg-row td {
+  font-weight: 400;
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  border-bottom: none;
+}
+
+/* ---- Section Divider ---- */
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
 /* ---- Animations ---- */
 @keyframes fadeUp {
   from {
@@ -526,6 +623,13 @@ input[type="number"] { -moz-appearance: textfield; }
         </div>
       </div>
 
+      <div class="grade-tabs" id="inputTabs">
+        <button class="grade-tab active" data-grade="3" onclick="switchGrade(3)">三年级</button>
+        <button class="grade-tab" data-grade="4" onclick="switchGrade(4)">四年级</button>
+        <button class="grade-tab" data-grade="5" onclick="switchGrade(5)">五年级</button>
+        <button class="grade-tab" data-grade="6" onclick="switchGrade(6)">六年级</button>
+      </div>
+
       <div class="field">
         <div class="field-label">
           <span>第一轮通过率</span>
@@ -572,16 +676,48 @@ input[type="number"] { -moz-appearance: textfield; }
       </div>
     </div>
 
-    <!-- RIGHT PANEL: Funnel -->
+    <!-- RIGHT PANEL: Summary + Funnel -->
     <div class="panel">
       <div class="panel-header">
         <div class="panel-icon chart">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 6-10"/></svg>
         </div>
         <div>
-          <div class="panel-title">筛选漏斗</div>
-          <div class="panel-subtitle">各轮参加人数与占比</div>
+          <div class="panel-title">数据总览</div>
+          <div class="panel-subtitle">各年级各轮参加人数</div>
         </div>
+      </div>
+
+      <!-- Summary Table -->
+      <div class="summary-table-wrap">
+        <table class="summary-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>第一轮</th>
+              <th>第二轮</th>
+              <th>第三轮</th>
+              <th>最终通过</th>
+            </tr>
+          </thead>
+          <tbody id="summaryBody">
+            <tr id="row3"><td>三年级</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+            <tr id="row4"><td>四年级</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+            <tr id="row5"><td>五年级</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+            <tr id="row6"><td>六年级</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+            <tr class="total-row" id="rowTotal"><td>总计</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+            <tr class="avg-row" id="rowAvg"><td>平均通过率</td><td>-</td><td>-</td><td>-</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Funnel Section -->
+      <div class="section-label">筛选漏斗</div>
+      <div class="grade-tabs" id="funnelTabs">
+        <button class="grade-tab active" data-grade="3" onclick="switchFunnel(3)">三年级</button>
+        <button class="grade-tab" data-grade="4" onclick="switchFunnel(4)">四年级</button>
+        <button class="grade-tab" data-grade="5" onclick="switchFunnel(5)">五年级</button>
+        <button class="grade-tab" data-grade="6" onclick="switchFunnel(6)">六年级</button>
       </div>
 
       <div class="funnel">
@@ -663,42 +799,140 @@ input[type="number"] { -moz-appearance: textfield; }
 </div>
 
 <script>
-function calc() {
-  const x  = parseFloat(document.getElementById('finalPass').value) || 0;
-  const r1 = parseFloat(document.getElementById('r1').value) / 100 || 0;
-  const r2 = parseFloat(document.getElementById('r2').value) / 100 || 0;
-  const r3 = parseFloat(document.getElementById('r3').value) / 100 || 0;
+// Data for each grade
+const gradeData = {
+  3: { r1: 40, r2: 25, r3: 15, finalPass: 15 },
+  4: { r1: 40, r2: 25, r3: 15, finalPass: 15 },
+  5: { r1: 40, r2: 25, r3: 15, finalPass: 15 },
+  6: { r1: 40, r2: 25, r3: 15, finalPass: 15 },
+};
 
-  const empty = r3 === 0 || x === 0;
-  const n1 = empty ? 0 : Math.ceil(x / r3);
-  const n2 = empty ? 0 : Math.ceil(x * r1 / r3);
-  const n3 = empty ? 0 : Math.ceil(x * r2 / r3);
+let currentGrade = 3;
+let currentFunnelGrade = 3;
 
-  // Update funnel bars
-  const maxVal = n1 || 1;
-  document.getElementById('bar1').style.width = '100%';
-  document.getElementById('bar2').style.width = (n2 / maxVal * 100) + '%';
-  document.getElementById('bar3').style.width = (n3 / maxVal * 100) + '%';
-
-  // Update values
-  document.getElementById('fv1').textContent = empty ? '-' : n1;
-  document.getElementById('fv2').textContent = empty ? '-' : n2;
-  document.getElementById('fv3').textContent = empty ? '-' : n3;
-
-  // Update percentages
-  document.getElementById('pct2').textContent = empty ? '-' : Math.round(r1 * 100) + '%';
-  document.getElementById('pct3').textContent = empty ? '-' : Math.round(r2 * 100) + '%';
-
-  // Update drop labels
-  const drop1 = (1 - r1) * 100;
-  const drop2 = (r1 - r2) * 100;
-  document.getElementById('dropLabel1').textContent = empty ? '-' : '淘汰 ' + Math.round(drop1) + '%';
-  document.getElementById('dropLabel2').textContent = empty ? '-' : '淘汰 ' + Math.round(drop2) + '%';
-
-  // Update final
-  document.getElementById('finalOut').textContent = empty ? '-' : n3 > 0 ? x + ' 人' : '-';
+function saveCurrentInputs() {
+  const d = gradeData[currentGrade];
+  d.r1 = parseFloat(document.getElementById('r1').value) || 0;
+  d.r2 = parseFloat(document.getElementById('r2').value) || 0;
+  d.r3 = parseFloat(document.getElementById('r3').value) || 0;
+  d.finalPass = parseFloat(document.getElementById('finalPass').value) || 0;
 }
 
+function loadInputs(grade) {
+  const d = gradeData[grade];
+  document.getElementById('r1').value = d.r1;
+  document.getElementById('r2').value = d.r2;
+  document.getElementById('r3').value = d.r3;
+  document.getElementById('finalPass').value = d.finalPass;
+}
+
+function setActiveTab(container, grade) {
+  container.querySelectorAll('.grade-tab').forEach(t => {
+    t.classList.toggle('active', parseInt(t.dataset.grade) === grade);
+  });
+}
+
+function switchGrade(grade) {
+  saveCurrentInputs();
+  currentGrade = grade;
+  loadInputs(grade);
+  setActiveTab(document.getElementById('inputTabs'), grade);
+  // Sync funnel tab
+  switchFunnel(grade);
+  calc();
+}
+
+function switchFunnel(grade) {
+  currentFunnelGrade = grade;
+  setActiveTab(document.getElementById('funnelTabs'), grade);
+  updateFunnel(grade);
+}
+
+function calcGrade(grade) {
+  const d = gradeData[grade];
+  const r1 = d.r1 / 100;
+  const r2 = d.r2 / 100;
+  const r3 = d.r3 / 100;
+  const x = d.finalPass;
+  const empty = r3 === 0 || x === 0;
+  return {
+    n1: empty ? 0 : Math.ceil(x / r3),
+    n2: empty ? 0 : Math.ceil(x * r1 / r3),
+    n3: empty ? 0 : Math.ceil(x * r2 / r3),
+    finalPass: x,
+    r1: d.r1, r2: d.r2, r3: d.r3,
+    empty
+  };
+}
+
+function updateFunnel(grade) {
+  const r = calcGrade(grade);
+  const maxVal = r.n1 || 1;
+
+  document.getElementById('bar1').style.width = '100%';
+  document.getElementById('bar2').style.width = (r.n2 / maxVal * 100) + '%';
+  document.getElementById('bar3').style.width = (r.n3 / maxVal * 100) + '%';
+
+  document.getElementById('fv1').textContent = r.empty ? '-' : r.n1;
+  document.getElementById('fv2').textContent = r.empty ? '-' : r.n2;
+  document.getElementById('fv3').textContent = r.empty ? '-' : r.n3;
+
+  document.getElementById('pct2').textContent = r.empty ? '-' : Math.round(r.r1) + '%';
+  document.getElementById('pct3').textContent = r.empty ? '-' : Math.round(r.r2) + '%';
+
+  const drop1 = (1 - r.r1 / 100) * 100;
+  const drop2 = (r.r1 / 100 - r.r2 / 100) * 100;
+  document.getElementById('dropLabel1').textContent = r.empty ? '-' : '淘汰 ' + Math.round(drop1) + '%';
+  document.getElementById('dropLabel2').textContent = r.empty ? '-' : '淘汰 ' + Math.round(drop2) + '%';
+
+  document.getElementById('finalOut').textContent = r.empty ? '-' : r.finalPass + ' 人';
+}
+
+function updateSummaryTable() {
+  const grades = [3, 4, 5, 6];
+  let totals = { n1: 0, n2: 0, n3: 0, finalPass: 0 };
+  let avgR = { r1: 0, r2: 0, r3: 0 };
+
+  grades.forEach(g => {
+    const r = calcGrade(g);
+    const row = document.getElementById('row' + g);
+    const cells = row.querySelectorAll('td');
+    cells[1].textContent = r.empty ? '-' : r.n1;
+    cells[2].textContent = r.empty ? '-' : r.n2;
+    cells[3].textContent = r.empty ? '-' : r.n3;
+    cells[4].textContent = r.empty ? '-' : r.finalPass;
+
+    totals.n1 += r.n1;
+    totals.n2 += r.n2;
+    totals.n3 += r.n3;
+    totals.finalPass += r.finalPass;
+    avgR.r1 += r.r1;
+    avgR.r2 += r.r2;
+    avgR.r3 += r.r3;
+  });
+
+  const totalRow = document.getElementById('rowTotal');
+  const tc = totalRow.querySelectorAll('td');
+  tc[1].textContent = totals.n1;
+  tc[2].textContent = totals.n2;
+  tc[3].textContent = totals.n3;
+  tc[4].textContent = totals.finalPass;
+
+  const avgRow = document.getElementById('rowAvg');
+  const ac = avgRow.querySelectorAll('td');
+  ac[1].textContent = (avgR.r1 / 4).toFixed(1) + '%';
+  ac[2].textContent = (avgR.r2 / 4).toFixed(1) + '%';
+  ac[3].textContent = (avgR.r3 / 4).toFixed(1) + '%';
+}
+
+function calc() {
+  saveCurrentInputs();
+  updateSummaryTable();
+  updateFunnel(currentFunnelGrade);
+}
+
+// Init
+loadInputs(currentGrade);
 calc();
 </script>
 
