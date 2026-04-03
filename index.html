@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>考试人数反推计算器</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: #e0e0e0;
+}
+
+.container {
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px;
+  padding: 48px 40px;
+  max-width: 520px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+
+h1 {
+  font-size: 1.6rem;
+  text-align: center;
+  margin-bottom: 8px;
+  background: linear-gradient(90deg, #a78bfa, #60a5fa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #888;
+  margin-bottom: 32px;
+}
+
+.section-title {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #a78bfa;
+  margin-bottom: 16px;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+  color: #bbb;
+}
+
+.input-group label span.hint {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+input[type="number"] {
+  flex: 1;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 1.1rem;
+  color: #fff;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+input[type="number"]:focus {
+  border-color: #a78bfa;
+}
+
+input[type="number"]::placeholder { color: #555; }
+
+.unit { font-size: 0.9rem; color: #888; min-width: 20px; }
+
+.divider {
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+  margin: 28px 0;
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.result-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.result-card:hover {
+  background: rgba(255,255,255,0.07);
+  transform: translateY(-1px);
+}
+
+.result-label {
+  font-size: 0.9rem;
+  color: #aaa;
+}
+
+.result-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  min-width: 60px;
+  text-align: right;
+}
+
+.result-card:nth-child(1) .result-value { color: #60a5fa; }
+.result-card:nth-child(2) .result-value { color: #a78bfa; }
+.result-card:nth-child(3) .result-value { color: #f472b6; }
+
+.formula-note {
+  margin-top: 24px;
+  padding: 14px 18px;
+  background: rgba(167,139,250,0.08);
+  border-radius: 12px;
+  font-size: 0.8rem;
+  color: #888;
+  line-height: 1.6;
+}
+
+.formula-note code {
+  color: #a78bfa;
+  font-family: "SF Mono", Menlo, monospace;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>考试人数反推计算器</h1>
+  <p class="subtitle">输入最终通过人数，反推各轮最低参加人数</p>
+
+  <div class="section-title">通过率设置</div>
+
+  <div class="input-group">
+    <label>第一轮通过率 <span class="hint">(基于第一轮参加人数)</span></label>
+    <div class="input-row">
+      <input type="number" id="r1" value="40" min="1" max="100" step="1" oninput="calc()">
+      <span class="unit">%</span>
+    </div>
+  </div>
+
+  <div class="input-group">
+    <label>第二轮通过率 <span class="hint">(基于第一轮参加人数)</span></label>
+    <div class="input-row">
+      <input type="number" id="r2" value="25" min="1" max="100" step="1" oninput="calc()">
+      <span class="unit">%</span>
+    </div>
+  </div>
+
+  <div class="input-group">
+    <label>第三轮通过率 <span class="hint">(基于第一轮参加人数)</span></label>
+    <div class="input-row">
+      <input type="number" id="r3" value="15" min="1" max="100" step="1" oninput="calc()">
+      <span class="unit">%</span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section-title">反推输入</div>
+
+  <div class="input-group">
+    <label>最终通过人数</label>
+    <div class="input-row">
+      <input type="number" id="finalPass" value="15" min="1" step="1" placeholder="输入最终通过人数" oninput="calc()">
+      <span class="unit">人</span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section-title">计算结果</div>
+
+  <div class="results">
+    <div class="result-card">
+      <span class="result-label">第一轮最低参加人数</span>
+      <span class="result-value" id="out1">100</span>
+    </div>
+    <div class="result-card">
+      <span class="result-label">第二轮最低参加人数</span>
+      <span class="result-value" id="out2">40</span>
+    </div>
+    <div class="result-card">
+      <span class="result-label">第三轮最低参加人数</span>
+      <span class="result-value" id="out3">25</span>
+    </div>
+  </div>
+
+  <div class="formula-note">
+    公式：第一轮 = <code>⌈X / R3⌉</code>，第二轮 = <code>⌈X × R1 / R3⌉</code>，第三轮 = <code>⌈X × R2 / R3⌉</code><br>
+    其中 X 为最终通过人数，R1/R2/R3 为各轮通过率（均以第一轮参加人数为基准）
+  </div>
+</div>
+
+<script>
+function calc() {
+  const x  = parseFloat(document.getElementById('finalPass').value) || 0;
+  const r1 = parseFloat(document.getElementById('r1').value) / 100 || 0;
+  const r2 = parseFloat(document.getElementById('r2').value) / 100 || 0;
+  const r3 = parseFloat(document.getElementById('r3').value) / 100 || 0;
+
+  if (r3 === 0 || x === 0) {
+    document.getElementById('out1').textContent = '-';
+    document.getElementById('out2').textContent = '-';
+    document.getElementById('out3').textContent = '-';
+    return;
+  }
+
+  const n1 = Math.ceil(x / r3);
+  const n2 = Math.ceil(x * r1 / r3);
+  const n3 = Math.ceil(x * r2 / r3);
+
+  document.getElementById('out1').textContent = n1;
+  document.getElementById('out2').textContent = n2;
+  document.getElementById('out3').textContent = n3;
+}
+
+calc();
+</script>
+
+</body>
+</html>
