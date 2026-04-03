@@ -4,224 +4,661 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>考试人数反推计算器</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+:root {
+  --bg: #1a1814;
+  --bg-card: #211f1a;
+  --bg-elevated: #2a2722;
+  --border: #3a3630;
+  --border-light: #4a4540;
+  --text: #e8e0d4;
+  --text-muted: #9a9080;
+  --text-dim: #6a6458;
+  --amber: #e8a848;
+  --amber-glow: #e8a84830;
+  --amber-deep: #c8882a;
+  --blue-slate: #7a9ab8;
+  --rose: #c87a6a;
+  --teal: #6aaa98;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+html { font-size: 16px; }
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
   min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- Dot grid background ---- */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle, #3a363020 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ---- Ambient glow ---- */
+body::after {
+  content: '';
+  position: fixed;
+  top: -30%;
+  right: -20%;
+  width: 60vw;
+  height: 60vw;
+  background: radial-gradient(ellipse, var(--amber-glow), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ---- Layout ---- */
+.page {
+  position: relative;
+  z-index: 1;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 60px 40px 80px;
+}
+
+/* ---- Header ---- */
+header {
+  text-align: center;
+  margin-bottom: 56px;
+  animation: fadeUp 0.8s ease-out;
+}
+
+header .overline {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
-  color: #e0e0e0;
-}
-
-.container {
-  background: rgba(255,255,255,0.06);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 24px;
-  padding: 48px 40px;
-  max-width: 520px;
-  width: 100%;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-}
-
-h1 {
-  font-size: 1.6rem;
-  text-align: center;
-  margin-bottom: 8px;
-  background: linear-gradient(90deg, #a78bfa, #60a5fa);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.subtitle {
-  text-align: center;
-  font-size: 0.85rem;
-  color: #888;
-  margin-bottom: 32px;
-}
-
-.section-title {
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: #a78bfa;
-  margin-bottom: 16px;
-}
-
-.input-group {
-  margin-bottom: 20px;
-}
-
-.input-group label {
-  display: block;
-  font-size: 0.9rem;
-  margin-bottom: 6px;
-  color: #bbb;
-}
-
-.input-group label span.hint {
-  font-size: 0.75rem;
-  color: #666;
-}
-
-.input-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-input[type="number"] {
-  flex: 1;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 12px;
-  padding: 12px 16px;
-  font-size: 1.1rem;
-  color: #fff;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-input[type="number"]:focus {
-  border-color: #a78bfa;
-}
-
-input[type="number"]::placeholder { color: #555; }
-
-.unit { font-size: 0.9rem; color: #888; min-width: 20px; }
-
-.divider {
-  height: 1px;
-  background: rgba(255,255,255,0.08);
-  margin: 28px 0;
-}
-
-.results {
-  display: flex;
-  flex-direction: column;
   gap: 12px;
 }
 
-.result-card {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 14px;
-  padding: 16px 20px;
+header .overline::before,
+header .overline::after {
+  content: '';
+  width: 40px;
+  height: 1px;
+  background: var(--amber);
+  opacity: 0.4;
+}
+
+header h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 5vw, 3.6rem);
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+header h1 em {
+  font-style: italic;
+  color: var(--amber);
+}
+
+header .tagline {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-top: 12px;
+  font-weight: 300;
+}
+
+/* ---- Main Grid ---- */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+/* ---- Panel ---- */
+.panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  animation: fadeUp 0.8s ease-out both;
+}
+
+.panel:nth-child(2) { animation-delay: 0.15s; }
+
+.panel-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  transition: transform 0.2s, background 0.2s;
+  gap: 10px;
+  margin-bottom: 28px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
 }
 
-.result-card:hover {
-  background: rgba(255,255,255,0.07);
-  transform: translateY(-1px);
+.panel-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  flex-shrink: 0;
 }
 
-.result-label {
-  font-size: 0.9rem;
-  color: #aaa;
+.panel-icon.settings { background: var(--amber-glow); color: var(--amber); }
+.panel-icon.chart { background: #7a9ab820; color: var(--blue-slate); }
+
+.panel-title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
 }
 
-.result-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  min-width: 60px;
-  text-align: right;
+.panel-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-top: 2px;
 }
 
-.result-card:nth-child(1) .result-value { color: #60a5fa; }
-.result-card:nth-child(2) .result-value { color: #a78bfa; }
-.result-card:nth-child(3) .result-value { color: #f472b6; }
+/* ---- Input fields ---- */
+.field {
+  margin-bottom: 20px;
+}
 
-.formula-note {
-  margin-top: 24px;
-  padding: 14px 18px;
-  background: rgba(167,139,250,0.08);
-  border-radius: 12px;
+.field:last-child { margin-bottom: 0; }
+
+.field-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.field-label span {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.field-label .badge {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--bg-elevated);
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+}
+
+.input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrap input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 40px 12px 16px;
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+.input-wrap input:focus {
+  border-color: var(--amber-deep);
+  box-shadow: 0 0 0 3px var(--amber-glow);
+}
+
+.input-wrap input::placeholder { color: var(--text-dim); }
+
+.input-wrap .suffix {
+  position: absolute;
+  right: 14px;
+  font-family: var(--font-mono);
   font-size: 0.8rem;
-  color: #888;
-  line-height: 1.6;
+  color: var(--text-dim);
+  pointer-events: none;
 }
 
-.formula-note code {
-  color: #a78bfa;
-  font-family: "SF Mono", Menlo, monospace;
+/* hide number input spinners */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] { -moz-appearance: textfield; }
+
+/* ---- Divider in panel ---- */
+.panel-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 24px 0;
+  position: relative;
+}
+
+.panel-divider::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 40px;
+  height: 1px;
+  background: var(--amber);
+  opacity: 0.5;
+}
+
+/* ---- Final input highlight ---- */
+.field-highlight .input-wrap input {
+  border-color: var(--amber-deep);
+  background: #2a2518;
+  font-size: 1.2rem;
+  padding: 14px 40px 14px 16px;
+}
+
+.field-highlight .field-label span {
+  color: var(--amber);
+  font-weight: 700;
+}
+
+/* ---- Funnel Visualization ---- */
+.funnel {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.funnel-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 0;
+}
+
+.funnel-stage + .funnel-stage {
+  border-top: 1px dashed var(--border);
+}
+
+.funnel-rank {
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  font-weight: 700;
+  line-height: 1;
+  min-width: 32px;
+  color: var(--border-light);
+}
+
+.funnel-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.funnel-label {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 500;
+}
+
+.funnel-bar-track {
+  width: 100%;
+  height: 36px;
+  background: var(--bg);
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.funnel-bar {
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 60px;
+}
+
+.funnel-stage:nth-child(1) .funnel-bar {
+  background: linear-gradient(90deg, #4a7a9a, var(--blue-slate));
+}
+.funnel-stage:nth-child(2) .funnel-bar {
+  background: linear-gradient(90deg, #8a6ab8, #a888d0);
+}
+.funnel-stage:nth-child(3) .funnel-bar {
+  background: linear-gradient(90deg, var(--amber-deep), var(--amber));
+}
+
+.funnel-value {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  padding-left: 14px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  white-space: nowrap;
+}
+
+.funnel-pct {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  min-width: 48px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* ---- Connector arrows ---- */
+.funnel-connector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 0 4px 48px;
+  color: var(--text-dim);
+  font-size: 0.7rem;
+  gap: 8px;
+  opacity: 0.5;
+}
+
+.funnel-connector svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ---- Final result highlight ---- */
+.final-result {
+  margin-top: 8px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #2a2518, #2a2218);
+  border: 1px solid var(--amber-deep);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.final-result::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 80% 50%, var(--amber-glow), transparent 60%);
+  pointer-events: none;
+}
+
+.final-result-label {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--amber);
+  position: relative;
+}
+
+.final-result-value {
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--amber);
+  position: relative;
+}
+
+/* ---- Formula footer ---- */
+.formula-bar {
+  margin-top: 32px;
+  padding: 20px 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  animation: fadeUp 0.8s ease-out both;
+  animation-delay: 0.3s;
+}
+
+.formula-bar-title {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+.formula-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.formula-item {
+  text-align: center;
+  padding: 12px 8px;
+  background: var(--bg);
+  border-radius: 8px;
+}
+
+.formula-item .label {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.formula-item code {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--amber);
+  font-weight: 500;
+}
+
+/* ---- Animations ---- */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 720px) {
+  .page { padding: 32px 20px 60px; }
+  .main-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .panel { padding: 24px; }
+  .formula-grid {
+    grid-template-columns: 1fr;
+  }
+  header h1 { font-size: 2rem; }
+  .funnel-rank { font-size: 1.8rem; min-width: 24px; }
 }
 </style>
 </head>
 <body>
 
-<div class="container">
-  <h1>考试人数反推计算器</h1>
-  <p class="subtitle">输入最终通过人数，反推各轮最低参加人数</p>
+<div class="page">
+  <header>
+    <div class="overline">Exam Calculator</div>
+    <h1>考试人数<em>反推</em>计算器</h1>
+    <p class="tagline">输入最终通过人数与各轮通过率，即时反推各轮最低参加人数</p>
+  </header>
 
-  <div class="section-title">通过率设置</div>
+  <div class="main-grid">
+    <!-- LEFT PANEL: Inputs -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-icon settings">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4M4.22 4.22l2.83 2.83m9.9 9.9l2.83 2.83M1 12h4m14 0h4M4.22 19.78l2.83-2.83m9.9-9.9l2.83-2.83"/></svg>
+        </div>
+        <div>
+          <div class="panel-title">参数配置</div>
+          <div class="panel-subtitle">调整通过率与目标人数</div>
+        </div>
+      </div>
 
-  <div class="input-group">
-    <label>第一轮通过率 <span class="hint">(基于第一轮参加人数)</span></label>
-    <div class="input-row">
-      <input type="number" id="r1" value="40" min="1" max="100" step="1" oninput="calc()">
-      <span class="unit">%</span>
+      <div class="field">
+        <div class="field-label">
+          <span>第一轮通过率</span>
+          <span class="badge">基于第一轮人数</span>
+        </div>
+        <div class="input-wrap">
+          <input type="number" id="r1" value="40" min="1" max="100" step="1" oninput="calc()">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">
+          <span>第二轮通过率</span>
+          <span class="badge">基于第一轮人数</span>
+        </div>
+        <div class="input-wrap">
+          <input type="number" id="r2" value="25" min="1" max="100" step="1" oninput="calc()">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">
+          <span>第三轮通过率</span>
+          <span class="badge">基于第一轮人数</span>
+        </div>
+        <div class="input-wrap">
+          <input type="number" id="r3" value="15" min="1" max="100" step="1" oninput="calc()">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+
+      <div class="panel-divider"></div>
+
+      <div class="field field-highlight">
+        <div class="field-label">
+          <span>最终通过人数</span>
+        </div>
+        <div class="input-wrap">
+          <input type="number" id="finalPass" value="15" min="1" step="1" placeholder="输入目标人数" oninput="calc()">
+          <span class="suffix">人</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: Funnel -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-icon chart">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 6-10"/></svg>
+        </div>
+        <div>
+          <div class="panel-title">筛选漏斗</div>
+          <div class="panel-subtitle">各轮参加人数与占比</div>
+        </div>
+      </div>
+
+      <div class="funnel">
+        <div class="funnel-stage">
+          <div class="funnel-rank">1</div>
+          <div class="funnel-body">
+            <div class="funnel-label">第一轮 参加人数</div>
+            <div class="funnel-bar-track">
+              <div class="funnel-bar" id="bar1" style="width:100%">
+                <span class="funnel-value" id="fv1">100</span>
+              </div>
+            </div>
+          </div>
+          <div class="funnel-pct">100%</div>
+        </div>
+
+        <div class="funnel-connector">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-4-4l4 4 4-4"/></svg>
+          <span id="dropLabel1">淘汰 60%</span>
+        </div>
+
+        <div class="funnel-stage">
+          <div class="funnel-rank">2</div>
+          <div class="funnel-body">
+            <div class="funnel-label">第二轮 参加人数</div>
+            <div class="funnel-bar-track">
+              <div class="funnel-bar" id="bar2" style="width:40%">
+                <span class="funnel-value" id="fv2">40</span>
+              </div>
+            </div>
+          </div>
+          <div class="funnel-pct" id="pct2">40%</div>
+        </div>
+
+        <div class="funnel-connector">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-4-4l4 4 4-4"/></svg>
+          <span id="dropLabel2">淘汰 15%</span>
+        </div>
+
+        <div class="funnel-stage">
+          <div class="funnel-rank">3</div>
+          <div class="funnel-body">
+            <div class="funnel-label">第三轮 参加人数</div>
+            <div class="funnel-bar-track">
+              <div class="funnel-bar" id="bar3" style="width:25%">
+                <span class="funnel-value" id="fv3">25</span>
+              </div>
+            </div>
+          </div>
+          <div class="funnel-pct" id="pct3">25%</div>
+        </div>
+      </div>
+
+      <div class="final-result">
+        <div class="final-result-label">最终通过</div>
+        <div class="final-result-value" id="finalOut">15 人</div>
+      </div>
     </div>
   </div>
 
-  <div class="input-group">
-    <label>第二轮通过率 <span class="hint">(基于第一轮参加人数)</span></label>
-    <div class="input-row">
-      <input type="number" id="r2" value="25" min="1" max="100" step="1" oninput="calc()">
-      <span class="unit">%</span>
+  <!-- Formula bar -->
+  <div class="formula-bar">
+    <div class="formula-bar-title">Formula Reference</div>
+    <div class="formula-grid">
+      <div class="formula-item">
+        <div class="label">第一轮人数</div>
+        <code>&lceil; X &divide; R3 &rceil;</code>
+      </div>
+      <div class="formula-item">
+        <div class="label">第二轮人数</div>
+        <code>&lceil; X &times; R1 &divide; R3 &rceil;</code>
+      </div>
+      <div class="formula-item">
+        <div class="label">第三轮人数</div>
+        <code>&lceil; X &times; R2 &divide; R3 &rceil;</code>
+      </div>
     </div>
-  </div>
-
-  <div class="input-group">
-    <label>第三轮通过率 <span class="hint">(基于第一轮参加人数)</span></label>
-    <div class="input-row">
-      <input type="number" id="r3" value="15" min="1" max="100" step="1" oninput="calc()">
-      <span class="unit">%</span>
-    </div>
-  </div>
-
-  <div class="divider"></div>
-
-  <div class="section-title">反推输入</div>
-
-  <div class="input-group">
-    <label>最终通过人数</label>
-    <div class="input-row">
-      <input type="number" id="finalPass" value="15" min="1" step="1" placeholder="输入最终通过人数" oninput="calc()">
-      <span class="unit">人</span>
-    </div>
-  </div>
-
-  <div class="divider"></div>
-
-  <div class="section-title">计算结果</div>
-
-  <div class="results">
-    <div class="result-card">
-      <span class="result-label">第一轮最低参加人数</span>
-      <span class="result-value" id="out1">100</span>
-    </div>
-    <div class="result-card">
-      <span class="result-label">第二轮最低参加人数</span>
-      <span class="result-value" id="out2">40</span>
-    </div>
-    <div class="result-card">
-      <span class="result-label">第三轮最低参加人数</span>
-      <span class="result-value" id="out3">25</span>
-    </div>
-  </div>
-
-  <div class="formula-note">
-    公式：第一轮 = <code>⌈X / R3⌉</code>，第二轮 = <code>⌈X × R1 / R3⌉</code>，第三轮 = <code>⌈X × R2 / R3⌉</code><br>
-    其中 X 为最终通过人数，R1/R2/R3 为各轮通过率（均以第一轮参加人数为基准）
   </div>
 </div>
 
@@ -232,20 +669,34 @@ function calc() {
   const r2 = parseFloat(document.getElementById('r2').value) / 100 || 0;
   const r3 = parseFloat(document.getElementById('r3').value) / 100 || 0;
 
-  if (r3 === 0 || x === 0) {
-    document.getElementById('out1').textContent = '-';
-    document.getElementById('out2').textContent = '-';
-    document.getElementById('out3').textContent = '-';
-    return;
-  }
+  const empty = r3 === 0 || x === 0;
+  const n1 = empty ? 0 : Math.ceil(x / r3);
+  const n2 = empty ? 0 : Math.ceil(x * r1 / r3);
+  const n3 = empty ? 0 : Math.ceil(x * r2 / r3);
 
-  const n1 = Math.ceil(x / r3);
-  const n2 = Math.ceil(x * r1 / r3);
-  const n3 = Math.ceil(x * r2 / r3);
+  // Update funnel bars
+  const maxVal = n1 || 1;
+  document.getElementById('bar1').style.width = '100%';
+  document.getElementById('bar2').style.width = (n2 / maxVal * 100) + '%';
+  document.getElementById('bar3').style.width = (n3 / maxVal * 100) + '%';
 
-  document.getElementById('out1').textContent = n1;
-  document.getElementById('out2').textContent = n2;
-  document.getElementById('out3').textContent = n3;
+  // Update values
+  document.getElementById('fv1').textContent = empty ? '-' : n1;
+  document.getElementById('fv2').textContent = empty ? '-' : n2;
+  document.getElementById('fv3').textContent = empty ? '-' : n3;
+
+  // Update percentages
+  document.getElementById('pct2').textContent = empty ? '-' : Math.round(r1 * 100) + '%';
+  document.getElementById('pct3').textContent = empty ? '-' : Math.round(r2 * 100) + '%';
+
+  // Update drop labels
+  const drop1 = (1 - r1) * 100;
+  const drop2 = (r1 - r2) * 100;
+  document.getElementById('dropLabel1').textContent = empty ? '-' : '淘汰 ' + Math.round(drop1) + '%';
+  document.getElementById('dropLabel2').textContent = empty ? '-' : '淘汰 ' + Math.round(drop2) + '%';
+
+  // Update final
+  document.getElementById('finalOut').textContent = empty ? '-' : n3 > 0 ? x + ' 人' : '-';
 }
 
 calc();
